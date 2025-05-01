@@ -1,6 +1,3 @@
-Here's an updated version of the `README.md` file that includes the mention of the "Kuhimi" method and is written in English:
-
-```markdown
 # Bit Swapping Encryption
 
 This project implements a simple encryption and decryption system for strings using a bit-swapping scheme based on a user-provided key. The method is inspired by the Kuhimi technique, which focuses on manipulating bits to achieve encryption.
@@ -53,8 +50,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contribution
 
 If you would like to contribute to the project, please fork the repository, make your changes, and create a pull request.
-```
-
-### Notes:
-- Replace `your_username` and `your_repository` with your GitHub username and the name of your repository.
-- Feel free to add any additional sections or modify the content to better fit your project's needs.
