@@ -1,4 +1,4 @@
-# Bit Swapping Encryption
+# Kuhimi Encryption
 
 This project implements a simple encryption and decryption system for strings using a bit-swapping scheme based on a user-provided key. The method is inspired by the Kuhimi technique, which focuses on manipulating bits to achieve encryption.
 
