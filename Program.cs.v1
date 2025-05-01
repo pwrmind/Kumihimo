@@ -1,0 +1,144 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Text;
+
+namespace Kumihimo;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Введите строку для шифрования:");
+        string input = Console.ReadLine();
+
+        Console.WriteLine("Введите ключ:");
+        string key = Console.ReadLine();
+
+        // Генерация схемы обмена битами на основе ключа
+        List<Tuple<int, int>> swapScheme = GenerateSwapScheme(key);
+        
+        // Сохранение схемы в изображение
+        //SaveSwapSchemeToImage(swapScheme, "swap_scheme.bmp");
+
+        // Загрузка схемы из изображения
+        //List<Tuple<int, int>> loadedSwapScheme = LoadSwapSchemeFromImage("swap_scheme.png");
+
+        byte[] encrypted = Encrypt(input, swapScheme);
+        Console.WriteLine($"Зашифрованная строка: {BitConverter.ToString(encrypted)}");
+
+        string decrypted = Decrypt(encrypted, swapScheme);
+        Console.WriteLine($"Расшифрованная строка: {decrypted}");
+    }
+
+    static List<Tuple<int, int>> GenerateSwapScheme(string key)
+    {
+        var swapScheme = new List<Tuple<int, int>>();
+        Random random = new Random(key.GetHashCode());
+
+        // Генерация случайной схемы обмена битами
+        for (int i = 0; i < 4; i++) // Меняем местами 4 пары бит
+        {
+            int index1 = random.Next(0, 8);
+            int index2 = random.Next(0, 8);
+            if (index1 != index2)
+            {
+                swapScheme.Add(Tuple.Create(index1, index2));
+            }
+        }
+
+        return swapScheme;
+    }
+
+    static void SaveSwapSchemeToImage(List<Tuple<int, int>> swapScheme, string filePath)
+    {
+        using (Bitmap bitmap = new Bitmap(8, 8))
+        {
+            // Инициализация всех пикселей белым цветом (0)
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    bitmap.SetPixel(x, y, Color.White);
+                }
+            }
+
+            // Установка черных пикселей (1) в соответствии со схемой
+            foreach (var swap in swapScheme)
+            {
+                int index1 = swap.Item1;
+                int index2 = swap.Item2;
+
+                // Устанавливаем пиксели в черный цвет
+                bitmap.SetPixel(index1 % 8, index1 / 8, Color.Black);
+                bitmap.SetPixel(index2 % 8, index2 / 8, Color.Black);
+            }
+
+            bitmap.Save(filePath);
+        }
+    }
+
+    static List<Tuple<int, int>> LoadSwapSchemeFromImage(string filePath)
+    {
+        var swapScheme = new List<Tuple<int, int>>();
+
+        using (Bitmap bitmap = new Bitmap(filePath))
+        {
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    Color pixelColor = bitmap.GetPixel(x, y);
+                    if (pixelColor == Color.Black)
+                    {
+                        int index = y * 8 + x;
+                        swapScheme.Add(Tuple.Create(index, index)); // Здесь можно добавить логику для определения пар
+                    }
+                }
+            }
+        }
+
+        return swapScheme;
+    }
+
+    static byte[] Encrypt(string input, List<Tuple<int, int>> swapScheme)
+    {
+        byte[] bytes = Encoding.UTF8.GetBytes(input);
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            bytes[i] = SwapBits(bytes[i], swapScheme);
+        }
+        return bytes;
+    }
+
+    static string Decrypt(byte[] input, List<Tuple<int, int>> swapScheme)
+    {
+        for (int i = 0; i < input.Length; i++)
+        {
+            input[i] = SwapBits(input[i], swapScheme);
+        }
+        return Encoding.UTF8.GetString(input);
+    }
+
+    static byte SwapBits(byte b, List<Tuple<int, int>> swapScheme)
+    {
+        // Получаем двоичное представление байта
+        char[] bits = Convert.ToString(b, 2).PadLeft(8, '0').ToCharArray();
+
+        // Меняем местами биты по схеме
+        foreach (var swap in swapScheme)
+        {
+            int index1 = swap.Item1;
+            int index2 = swap.Item2;
+
+            // Меняем местами биты
+            char temp = bits[index1];
+            bits[index1] = bits[index2];
+            bits[index2] = temp;
+        }
+
+        // Преобразуем обратно в байт
+        return Convert.ToByte(new string(bits), 2);
+    }
+}
